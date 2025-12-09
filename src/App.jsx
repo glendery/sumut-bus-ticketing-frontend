@@ -89,35 +89,31 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
         // Jika berhasil dapat token, panggil SNAP
         if (res.data.token && window.snap) {
             window.snap.pay(res.data.token, {
-                onSuccess: function(result){
-                    alert("✅ Pembayaran Berhasil! Tiket diterbitkan.");
-                    onSuccess(); 
-                    onClose();
+                onSuccess: function(){ // Hapus 'result'
+                alert("✅ Pembayaran Berhasil! Tiket diterbitkan.");
+                onSuccess(); 
+                onClose();
                 },
-                onPending: function(result){
-                    alert("⏳ Menunggu pembayaran...");
-                    onSuccess(); 
-                    onClose();
+                onPending: function(){ // Hapus 'result'
+                alert("⏳ Menunggu pembayaran...");
+                onSuccess(); 
+                onClose();
                 },
-                onError: function(result){
+                onError: function(){   // Hapus 'result'
                     alert("❌ Pembayaran Gagal!");
                     setLoading(false);
                 },
-                onClose: function(){
-                    alert('Anda menutup popup pembayaran sebelum menyelesaikan transaksi.');
-                    setLoading(false);
-                }
-            });
-        } else {
-            alert("Gagal memuat sistem pembayaran.");
-            setLoading(false);
-        }
-    })
-    .catch(err => { 
-        alert(err.response?.data?.pesan || err.message); 
-        setLoading(false); 
-    });
-  };
+                        });
+                    } else {
+                        alert("Gagal memuat sistem pembayaran.");
+                        setLoading(false);
+                    }
+                })
+                .catch(err => { 
+                    alert(err.response?.data?.pesan || err.message); 
+                    setLoading(false); 
+                });
+                };
 
   const renderSeatLayout = () => {
     const seats = [];
@@ -253,10 +249,10 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
 function Dashboard() {
   const navigate = useNavigate();
   
-  const [user, setUser] = useState(() => {
-      const dataUser = localStorage.getItem('userBus');
-      return dataUser ? JSON.parse(dataUser) : null;
-  });
+  const [user] = useState(() => { 
+    const dataUser = localStorage.getItem('userBus');
+    return dataUser ? JSON.parse(dataUser) : null;
+});
 
   const [activeTab, setActiveTab] = useState('home'); 
   const [rute, setRute] = useState([]);
@@ -531,17 +527,18 @@ function Dashboard() {
         
         {/* HISTORY TAB DENGAN PDF */}
         {activeTab === 'history' && (
-          <div style={{marginTop:'40px', maxWidth:'800px', margin:'40px auto'}}>
-             <h2 className="section-title" style={{textAlign:'center', marginBottom:'30px'}}>🎫 E-Ticket Saya</h2>
-             {history.length === 0 ? (
-                <div style={{textAlign:'center', padding:'50px', background:'white', borderRadius:'20px'}}>
-                    <p style={{color:'#888', marginBottom:'20px'}}>Belum ada riwayat perjalanan.</p>
-                    <button onClick={()=>setActiveTab('home')} className="btn-search" style={{width:'auto', padding:'10px 30px'}}>Cari Tiket Sekarang</button>
-                </div>
-             ) : (
-              history.map((order, index) => (
-                <div key={order.id}>
-                    <div id={`ticket-${index}`} className="ticket-premium">
+        <div style={{marginTop:'40px', maxWidth:'800px', margin:'40px auto'}}>
+        <h2 className="section-title" style={{textAlign:'center', marginBottom:'30px'}}>🎫 E-Ticket Saya</h2>
+        {history.length === 0 ? (
+            <div style={{textAlign:'center', padding:'50px', background:'white', borderRadius:'20px'}}>
+                <p style={{color:'#888', marginBottom:'20px'}}>Belum ada riwayat perjalanan.</p>
+                <button onClick={()=>setActiveTab('home')} className="btn-search" style={{width:'auto', padding:'10px 30px'}}>Cari Tiket Sekarang</button>
+            </div>
+        ) : (
+        history.map((order, index) => (
+            <div key={order._id || index}> 
+            {/* Gunakan _id (bawaan MongoDB) atau orderId_Midtrans */}
+                <div id={`ticket-${index}`} className="ticket-premium">
                        <div className="tp-left">
                           <div className="tp-header">
                               <img src={getLocalLogo(order.operator)} alt="Logo" style={{height:'40px', objectFit:'contain'}} />
