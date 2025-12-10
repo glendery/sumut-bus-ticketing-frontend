@@ -31,6 +31,7 @@ const getLocalLogo = (operator) => {
   if (op.includes('makmur')) return '/logos/Makmur.jpg';
   if (op.includes('paradep')) return '/logos/Paradep.jpg';
   if (op.includes('sampri')) return '/logos/Sampri.jpg';
+  if (op.includes('als')) return '/logos/ALS.jpeg';
   return null; 
 };
 
