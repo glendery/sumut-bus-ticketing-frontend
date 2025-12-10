@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
+import BookingPage from './BookingPage';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -12,8 +13,7 @@ const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', 
 // --- HELPER LOGO ---
 const getLocalLogo = (operator) => {
   if (!operator) return null;
-  const op = operator.toLowerCase();
-  if (op.includes('als')) return '/logos/ALS.jpeg';
+  const op = String(operator).toLowerCase(); 
   if (op.includes('bintang utara')) return '/logos/Bintang Utara Putra.png';
   if (op.includes('kbt')) return '/logos/KBT.jpg';
   if (op.includes('sejahtera')) return '/logos/Sejahtera.jpg';
@@ -646,13 +646,13 @@ function Dashboard() {
     </>
   );
 }
-
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/booking" element={<BookingPage />} /> // Tambahkan rute ini
     </Routes>
   );
 }
