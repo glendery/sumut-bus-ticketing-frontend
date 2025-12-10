@@ -10,6 +10,15 @@ import jsPDF from 'jspdf';
 
 const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(n);
 
+const loadImage = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = url;
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+  });
+};
 // --- HELPER LOGO ---
 const getLocalLogo = (operator) => {
   if (!operator) return null;
@@ -541,9 +550,17 @@ function Dashboard() {
                 <div id={`ticket-${index}`} className="ticket-premium">
                        <div className="tp-left">
                           <div className="tp-header">
-                              <img src={getLocalLogo(order.operator)} alt="Logo" style={{height:'40px', objectFit:'contain'}} />
-                              <span style={{background: order.kategori==='BUS'?'#dbeafe':'#fef3c7', color: order.kategori==='BUS'?'#1e40af':'#92400e', padding:'4px 12px', borderRadius:'20px', fontSize:'0.75rem', fontWeight:'800'}}>{order.operator}</span>
-                          </div>
+                                {/* SOLUSI: Gunakan BusLogo agar kalau error dia muncul ikon bus 🚌 */}
+                                <BusLogo 
+                                    src={getLocalLogo(order.operator)} 
+                                    alt={order.operator} 
+                                    style={{height:'40px', objectFit:'contain'}} 
+                                />
+                                
+                                <span style={{background: order.kategori==='BUS'?'#dbeafe':'#fef3c7', color: order.kategori==='BUS'?'#1e40af':'#92400e', padding:'4px 12px', borderRadius:'20px', fontSize:'0.75rem', fontWeight:'800'}}>
+                                    {order.operator}
+                                </span>
+                            </div>
                           <div style={{display:'flex', alignItems:'center', gap:'15px', marginBottom:'20px'}}>
                               <div>
                                   <div className="tp-label">DARI</div>
@@ -595,24 +612,56 @@ function Dashboard() {
                        </div>
 
                     </div>
-                    <div style={{textAlign:'right', marginBottom:'30px'}}>
-                        <button className="btn-download" style={{width:'auto', display:'inline-flex', alignItems:'center', gap:'5px', background:'#334155'}}
-                            onClick={() => {
-                                const input = document.getElementById(`ticket-${index}`);
-                                html2canvas(input, { scale: 2 }).then((canvas) => {
+                    <button className="btn-download" style={{width:'auto', display:'inline-flex', alignItems:'center', gap:'5px', background:'#334155'}}
+                            onClick={async () => { // Tambahkan async di sini
+                                try {
+                                    const input = document.getElementById(`ticket-${index}`);
+                                    
+                                    // 1. Ambil Screenshot Tiket
+                                    const canvas = await html2canvas(input, { scale: 2, useCORS: true });
                                     const imgData = canvas.toDataURL('image/png');
+                                    
+                                    // 2. Siapkan PDF
                                     const pdf = new jsPDF('p', 'mm', 'a4');
+                                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                                    
+                                    // 3. Load Logo NaikAjaa
+                                    try {
+                                        const logoImg = await loadImage('/logos/Logo.png');
+                                        // Tambahkan Logo: (Image, Format, X, Y, Width, Height)
+                                        pdf.addImage(logoImg, 'PNG', 10, 10, 20, 20); 
+                                        
+                                        // Tambahkan Teks Header di sebelah Logo
+                                        pdf.setFontSize(16);
+                                        pdf.setFont("helvetica", "bold");
+                                        pdf.text("E-Ticket NaikAjaa (Official)", 35, 18);
+                                        
+                                        pdf.setFontSize(10);
+                                        pdf.setFont("helvetica", "normal");
+                                        pdf.text("Bukti perjalanan resmi & terverifikasi Blockchain", 35, 24);
+                                    } catch (err) {
+                                        console.error("Gagal load logo, pakai teks saja", err);
+                                        pdf.text("E-Ticket NaikAjaa (Official)", 10, 15);
+                                    }
+
+                                    // 4. Masukkan Screenshot Tiket di bawah Header
                                     const imgProps = pdf.getImageProperties(imgData);
-                                    const pdfWidth = pdf.internal.pageSize.getWidth() - 20; 
-                                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                                    pdf.text("E-Ticket NaikAjaa (Official)", 10, 15);
-                                    pdf.addImage(imgData, 'PNG', 10, 20, pdfWidth, pdfHeight);
+                                    const contentWidth = pdfWidth - 20; // Margin kiri kanan 10mm
+                                    const contentHeight = (imgProps.height * contentWidth) / imgProps.width;
+                                    
+                                    // Posisi Y = 35 (di bawah header logo)
+                                    pdf.addImage(imgData, 'PNG', 10, 35, contentWidth, contentHeight);
+                                    
+                                    // 5. Simpan
                                     pdf.save(`Tiket-${order.operator}-${order.tanggal}.pdf`);
-                                });
+                                    
+                                } catch (error) {
+                                    console.error("Gagal download PDF:", error);
+                                    alert("Gagal mendownload tiket.");
+                                }
                             }}
                         >📥 Download PDF</button>
                     </div>
-                </div>
               ))
              )}
           </div>
