@@ -366,7 +366,9 @@ function Dashboard() {
   return (
     <>
       <nav className="navbar">
-        <div className="logo"><img src="/logos/Logo.png" alt="NaikAjaa" onError={(e) => e.target.style.display='none'} /><span style={{marginLeft: '10px', color:'var(--primary)', fontWeight:'800', fontSize:'1.4rem', letterSpacing:'-0.5px'}}>NaikAjaa</span></div>
+        <div className="logo">
+        <img src="/logos/Logo.png" alt="NaikAjaa" style={{height: '50px', objectFit: 'contain'}} />
+        </div>
         <div className="nav-menu">
           <span className={`nav-item ${activeTab==='home'?'active':''}`} onClick={()=>setActiveTab('home')}>Cari Tiket</span>
           <span className={`nav-item ${activeTab==='history'?'active':''}`} onClick={()=>setActiveTab('history')}>Tiket Saya</span>
@@ -551,11 +553,10 @@ function Dashboard() {
                 <div id={`ticket-${index}`} className="ticket-premium">
                        <div className="tp-left">
                           <div className="tp-header">
-                                {/* SOLUSI: Gunakan BusLogo agar kalau error dia muncul ikon bus 🚌 */}
-                                <BusLogo 
-                                    src={getLocalLogo(order.operator)} 
-                                    alt={order.operator} 
-                                    style={{height:'40px', objectFit:'contain'}} 
+                                <img 
+                                    src="/logos/Logo.png" 
+                                    alt="NaikAjaa" 
+                                    style={{height:'50px', objectFit:'contain'}} 
                                 />
                                 
                                 <span style={{background: order.kategori==='BUS'?'#dbeafe':'#fef3c7', color: order.kategori==='BUS'?'#1e40af':'#92400e', padding:'4px 12px', borderRadius:'20px', fontSize:'0.75rem', fontWeight:'800'}}>
