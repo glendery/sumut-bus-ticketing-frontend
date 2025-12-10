@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // Props yang diterima:
 // - bookedSeats: Array nomor kursi yang sudah laku (contoh: [2, 5, 12])

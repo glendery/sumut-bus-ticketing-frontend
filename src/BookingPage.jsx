@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import SeatSelection from './SeatSelection';
 
 const BookingPage = () => {
+  // [1] --- SEMUA HOOKS HARUS DI BAGIAN PALING ATAS (Unconditional) ---
+  const [searchParams] = useSearchParams(); 
   const [nomorKursi, setNomorKursi] = useState(null);
-  const [kursiTerisi, setKursiTerisi] = useState([]); // Awalnya kosong
-  const [loading, setLoading] = useState(true);
+  const [kursiTerisi, setKursiTerisi] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Ganti dengan data rute/tanggal yang sedang dipilih user
-  const selectedRoute = "Medan - Sibolga";
-  const selectedDate = "2025-12-09"; 
+  // [2] --- AMBIL PARAMETER DINAMIS ---
+  const selectedRoute = searchParams.get('route'); 
+  const selectedDate = searchParams.get('date'); 
 
-  // --- FUNGSI OTOMATIS: Ambil Data Kursi dari Database ---
+  // [3] --- USE EFFECT (UNCONDITIONAL) ---
   useEffect(() => {
+    // KODE FETCH HANYA BOLEH DIJALANKAN JIKA PARAMETER LENGKAP
+    if (!selectedRoute || !selectedDate) {
+      // Jika missing params, jangan fetch, hanya set loading ke false jika perlu
+      setLoading(false); 
+      return; 
+    }
+
     const fetchBookedSeats = async () => {
       try {
         setLoading(true);
-        // Panggil API Backend yang baru kita buat
-        // Pastikan URL backend sesuai (localhost:5000 atau URL Vercel kamu)
-        const response = await fetch(`https://sumut-bus-ticketing-backend.vercel.app/api/seats?date=${selectedDate}&destination=${selectedRoute}`);
+        const backendUrl = "https://sumut-bus-ticketing-backend.vercel.app";
+        
+        // Fetch API menggunakan data dinamis yang sudah divalidasi
+        const response = await fetch(`${backendUrl}/api/seats?date=${selectedDate}&destination=${selectedRoute}`);
         const data = await response.json();
 
         if (data.success) {
-          setKursiTerisi(data.bookedSeats); // Update state dengan data asli DB
+          // parseInt() untuk memastikan nomor kursi adalah angka, bukan string
+          const seatNumbers = data.bookedSeats.map(seat => parseInt(seat));
+          setKursiTerisi(seatNumbers); 
+        } else {
+          console.error("API Gagal:", data.error);
         }
       } catch (error) {
         console.error("Gagal mengambil data kursi:", error);
@@ -31,12 +46,24 @@ const BookingPage = () => {
     };
 
     fetchBookedSeats();
-  }, [selectedRoute, selectedDate]); // Jalankan ulang jika rute/tanggal berubah
+  }, [selectedRoute, selectedDate]); 
+
+  // [4] --- EARLY RETURN (Conditional - Setelah Semua Hooks) ---
+  if (!selectedRoute || !selectedDate) {
+      return (
+        <div className="main-container">
+            <h2 className="section-title" style={{textAlign:'center', marginTop:'80px'}}>
+                ❌ Mohon pilih rute dan tanggal keberangkatan terlebih dahulu.
+            </h2>
+        </div>
+      );
+  }
 
   return (
     <div className="main-container">
-      <h2 className="section-title">Pilih Kursi ({selectedRoute})</h2>
+      <h2 className="section-title">Pilih Kursi ({selectedRoute}, {selectedDate})</h2>
       
+      {/* ... SISA KODE RENDER ... */}
       <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
         
         {/* BAGIAN KIRI: Layout Kursi */}
@@ -46,7 +73,7 @@ const BookingPage = () => {
           ) : (
             <SeatSelection 
               layoutType="bus" 
-              bookedSeats={kursiTerisi} // Data ini sekarang ASLI dari Database!
+              bookedSeats={kursiTerisi} 
               onSeatSelect={(nomor) => setNomorKursi(nomor)} 
             />
           )}
@@ -54,7 +81,8 @@ const BookingPage = () => {
 
         {/* BAGIAN KANAN: Ringkasan */}
         <div style={{ flex: 1, minWidth: '300px' }}>
-          <div className="ticket-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+          {/* ... KODE RINGKASAN ... */}
+           <div className="ticket-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
             <h3>Ringkasan Pesanan</h3>
             
             <div className="form-group" style={{ width: '100%' }}>
@@ -81,7 +109,6 @@ const BookingPage = () => {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
