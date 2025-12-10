@@ -366,16 +366,18 @@ function Dashboard() {
   return (
     <>
       <nav className="navbar">
+        {/* Hapus <span>NaikAjaa</span> agar tidak double */}
         <div className="logo">
-        <img src="/logos/Logo.png" alt="NaikAjaa" style={{height: '50px', objectFit: 'contain'}} />
+            <img src="/logos/Logo.png" alt="NaikAjaa" style={{height: '50px', objectFit: 'contain'}} />
         </div>
         <div className="nav-menu">
-          <span className={`nav-item ${activeTab==='home'?'active':''}`} onClick={()=>setActiveTab('home')}>Cari Tiket</span>
-          <span className={`nav-item ${activeTab==='history'?'active':''}`} onClick={()=>setActiveTab('history')}>Tiket Saya</span>
-          {user.role === 'admin' && <span className={`nav-item ${activeTab==='admin'?'active':''}`} style={{color:'#FACC15'}} onClick={()=>setActiveTab('admin')}>Admin Panel</span>}
-          <button onClick={logout} style={{background:'transparent', border:'1px solid #EF4444', color:'#EF4444', padding:'6px 16px', borderRadius:'50px', cursor:'pointer', fontWeight:'600'}}>Keluar</button>
+            {/* ... biarkan menu lain tetap sama ... */}
+            <span className={`nav-item ${activeTab==='home'?'active':''}`} onClick={()=>setActiveTab('home')}>Cari Tiket</span>
+            <span className={`nav-item ${activeTab==='history'?'active':''}`} onClick={()=>setActiveTab('history')}>Tiket Saya</span>
+            {user.role === 'admin' && <span className={`nav-item ${activeTab==='admin'?'active':''}`} style={{color:'#FACC15'}} onClick={()=>setActiveTab('admin')}>Admin Panel</span>}
+            <button onClick={logout} style={{background:'transparent', border:'1px solid #EF4444', color:'#EF4444', padding:'6px 16px', borderRadius:'50px', cursor:'pointer', fontWeight:'600'}}>Keluar</button>
         </div>
-      </nav>
+        </nav>
 
       {activeTab === 'home' && (
         <div className="hero-wrapper">
@@ -537,135 +539,118 @@ function Dashboard() {
           </>
         )}
         
-        {/* HISTORY TAB DENGAN PDF */}
+        {/* --- HISTORY TAB (FIXED FINAL) --- */}
         {activeTab === 'history' && (
-        <div style={{marginTop:'40px', maxWidth:'800px', margin:'40px auto'}}>
-        <h2 className="section-title" style={{textAlign:'center', marginBottom:'30px'}}>🎫 E-Ticket Saya</h2>
-        {history.length === 0 ? (
-            <div style={{textAlign:'center', padding:'50px', background:'white', borderRadius:'20px'}}>
-                <p style={{color:'#888', marginBottom:'20px'}}>Belum ada riwayat perjalanan.</p>
-                <button onClick={()=>setActiveTab('home')} className="btn-search" style={{width:'auto', padding:'10px 30px'}}>Cari Tiket Sekarang</button>
-            </div>
-        ) : (
-        history.map((order, index) => (
-            <div key={order._id || index}> 
-            {/* Gunakan _id (bawaan MongoDB) atau orderId_Midtrans */}
-                <div id={`ticket-${index}`} className="ticket-premium">
-                       <div className="tp-left">
-                          <div className="tp-header">
-                                <img 
-                                    src="/logos/Logo.png" 
-                                    alt="NaikAjaa" 
-                                    style={{height:'50px', objectFit:'contain'}} 
-                                />
-                                
-                                <span style={{background: order.kategori==='BUS'?'#dbeafe':'#fef3c7', color: order.kategori==='BUS'?'#1e40af':'#92400e', padding:'4px 12px', borderRadius:'20px', fontSize:'0.75rem', fontWeight:'800'}}>
-                                    {order.operator}
-                                </span>
+          <div style={{marginTop:'40px', maxWidth:'800px', margin:'40px auto'}}>
+            <h2 className="section-title" style={{textAlign:'center', marginBottom:'30px'}}>🎫 E-Ticket Saya</h2>
+            
+            {history.length === 0 ? (
+                <div style={{textAlign:'center', padding:'50px', background:'white', borderRadius:'20px'}}>
+                    <p style={{color:'#888', marginBottom:'20px'}}>Belum ada riwayat perjalanan.</p>
+                    <button onClick={()=>setActiveTab('home')} className="btn-search" style={{width:'auto', padding:'10px 30px'}}>Cari Tiket Sekarang</button>
+                </div>
+            ) : (
+                history.map((order, index) => (
+                    <div key={order._id || index} style={{marginBottom:'30px'}}>
+                        <div id={`ticket-${index}`} className="ticket-premium">
+                            <div className="tp-left">
+                                <div className="tp-header">
+                                    <img 
+                                        src="/logos/Logo.png" 
+                                        alt="NaikAjaa" 
+                                        style={{height:'40px', objectFit:'contain'}} 
+                                    />
+                                    <span style={{background: order.kategori==='BUS'?'#dbeafe':'#fef3c7', color: order.kategori==='BUS'?'#1e40af':'#92400e', padding:'4px 12px', borderRadius:'20px', fontSize:'0.75rem', fontWeight:'800'}}>
+                                        {order.operator}
+                                    </span>
+                                </div>
+                                <div style={{display:'flex', alignItems:'center', gap:'15px', marginBottom:'20px'}}>
+                                    <div>
+                                        <div className="tp-label">DARI</div>
+                                        <div className="tp-route">{order.rute.split('-')[0]}</div>
+                                        <div style={{fontSize:'0.8rem', color:'#64748b'}}>{order.lokasi_jemput_pilihan || order.lokasi_loket}</div>
+                                    </div>
+                                    <div style={{fontSize:'1.5rem', color:'#cbd5e1'}}>➝</div>
+                                    <div>
+                                        <div className="tp-label">KE</div>
+                                        <div className="tp-route">{order.rute.split('-')[1]}</div>
+                                        <div style={{fontSize:'0.8rem', color:'#64748b'}}>{order.lokasi_turun_pilihan || 'Terminal Pusat'}</div>
+                                    </div>
+                                </div>
+                                <div className="tp-details">
+                                    <div><div className="tp-label">TANGGAL & JAM</div><div className="tp-value">{order.tanggal} <span style={{color:'#cbd5e1'}}>|</span> {order.jam} WIB</div></div>
+                                    <div><div className="tp-label">PENUMPANG</div><div className="tp-value">{order.namaPenumpang}</div><div style={{fontSize:'0.7rem', color:'#94a3b8'}}>ID: {order.nikPenumpang}</div></div>
+                                    <div><div className="tp-label">NO. KURSI</div><div className="tp-value" style={{fontSize:'1.2rem', color:'#e11d48'}}>{order.seatNumber}</div></div>
+                                    <div><div className="tp-label">HARGA</div><div className="tp-value">{formatRupiah(order.totalBayar)}</div></div>
+                                </div>
                             </div>
-                          <div style={{display:'flex', alignItems:'center', gap:'15px', marginBottom:'20px'}}>
-                              <div>
-                                  <div className="tp-label">DARI</div>
-                                  <div className="tp-route">{order.rute.split('-')[0]}</div>
-                                  <div style={{fontSize:'0.8rem', color:'#64748b'}}>{order.lokasi_jemput_pilihan || order.lokasi_loket}</div>
-                              </div>
-                              <div style={{fontSize:'1.5rem', color:'#cbd5e1'}}>➝</div>
-                              <div>
-                                  <div className="tp-label">KE</div>
-                                  <div className="tp-route">{order.rute.split('-')[1]}</div>
-                                  <div style={{fontSize:'0.8rem', color:'#64748b'}}>{order.lokasi_turun_pilihan || 'Terminal Pusat'}</div>
-                              </div>
-                          </div>
-                          <div className="tp-details">
-                              <div><div className="tp-label">TANGGAL & JAM</div><div className="tp-value">{order.tanggal} <span style={{color:'#cbd5e1'}}>|</span> {order.jam} WIB</div></div>
-                              <div><div className="tp-label">PENUMPANG</div><div className="tp-value">{order.namaPenumpang}</div><div style={{fontSize:'0.7rem', color:'#94a3b8'}}>ID: {order.nikPenumpang}</div></div>
-                              <div><div className="tp-label">NO. KURSI</div><div className="tp-value" style={{fontSize:'1.2rem', color:'#e11d48'}}>{order.seatNumber}</div></div>
-                              <div><div className="tp-label">HARGA</div><div className="tp-value">{formatRupiah(order.totalBayar)}</div></div>
-                          </div>
-                       </div>
-                       
-                       {/* [UPDATE] BAGIAN KANAN: TOMBOL BAYAR / QR CODE */}
-                       <div className="tp-right" style={{display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-                           {order.status === 'PENDING' ? (
-                               <div style={{textAlign:'center'}}>
-                                   <p style={{color:'#F59E0B', fontWeight:'bold', marginBottom:'10px'}}>Menunggu Pembayaran</p>
-                                   <button 
-                                       onClick={() => window.snap && window.snap.pay(order.snap_token)} 
-                                       style={{
-                                           background:'#F59E0B', color:'#fff', border:'none', 
-                                           padding:'10px 20px', borderRadius:'8px', fontWeight:'bold', 
-                                           cursor:'pointer', boxShadow:'0 4px 12px rgba(245, 158, 11, 0.4)'
-                                       }}
-                                   >
-                                       💳 Bayar Sekarang
-                                   </button>
-                               </div>
-                           ) : (
-                               <>
-                                   <div style={{background:'white', padding:'8px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}>
-                                       <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${order.hash || 'PENDING'}`} alt="QR" style={{display:'block'}} />
-                                   </div>
-                                   <div style={{fontSize:'0.6rem', color:'#94a3b8', margin:'10px 0', wordBreak:'break-all', fontFamily:'monospace'}}>
-                                       HASH: {(order.hash || 'PENDING').substring(0, 15)}...
-                                   </div>
-                                   <div className="blockchain-badge"><span>🔒</span> Verified on Blockchain</div>
-                               </>
-                           )}
-                       </div>
+                            
+                            <div className="tp-right" style={{display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
+                                {order.status === 'PENDING' ? (
+                                    <div style={{textAlign:'center'}}>
+                                        <p style={{color:'#F59E0B', fontWeight:'bold', marginBottom:'10px'}}>Menunggu Pembayaran</p>
+                                        <button 
+                                            onClick={() => window.snap && window.snap.pay(order.snap_token)} 
+                                            style={{background:'#F59E0B', color:'#fff', border:'none', padding:'10px 20px', borderRadius:'8px', fontWeight:'bold', cursor:'pointer', boxShadow:'0 4px 12px rgba(245, 158, 11, 0.4)'}}
+                                        >
+                                            💳 Bayar Sekarang
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div style={{background:'white', padding:'8px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}>
+                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${order.hash || 'PENDING'}`} alt="QR" style={{display:'block'}} />
+                                        </div>
+                                        <div style={{fontSize:'0.6rem', color:'#94a3b8', margin:'10px 0', wordBreak:'break-all', fontFamily:'monospace'}}>
+                                            HASH: {(order.hash || 'PENDING').substring(0, 15)}...
+                                        </div>
+                                        <div className="blockchain-badge"><span>🔒</span> Verified on Blockchain</div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
 
-                    </div>
-                    <button className="btn-download" style={{width:'auto', display:'inline-flex', alignItems:'center', gap:'5px', background:'#334155'}}
-                            onClick={async () => { // Tambahkan async di sini
-                                try {
-                                    const input = document.getElementById(`ticket-${index}`);
-                                    
-                                    // 1. Ambil Screenshot Tiket
-                                    const canvas = await html2canvas(input, { scale: 2, useCORS: true });
-                                    const imgData = canvas.toDataURL('image/png');
-                                    
-                                    // 2. Siapkan PDF
-                                    const pdf = new jsPDF('p', 'mm', 'a4');
-                                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                                    
-                                    // 3. Load Logo NaikAjaa
+                        <div style={{textAlign:'right', marginTop:'10px'}}>
+                            <button className="btn-download" style={{width:'auto', display:'inline-flex', alignItems:'center', gap:'5px', background:'#334155'}}
+                                onClick={async () => {
                                     try {
-                                        const logoImg = await loadImage('/logos/Logo.png');
-                                        // Tambahkan Logo: (Image, Format, X, Y, Width, Height)
-                                        pdf.addImage(logoImg, 'PNG', 10, 10, 20, 20); 
+                                        const input = document.getElementById(`ticket-${index}`);
+                                        const canvas = await html2canvas(input, { scale: 2, useCORS: true });
+                                        const imgData = canvas.toDataURL('image/png');
+                                        const pdf = new jsPDF('p', 'mm', 'a4');
+                                        const pdfWidth = pdf.internal.pageSize.getWidth();
                                         
-                                        // Tambahkan Teks Header di sebelah Logo
-                                        pdf.setFontSize(16);
-                                        pdf.setFont("helvetica", "bold");
-                                        pdf.text("E-Ticket NaikAjaa (Official)", 35, 18);
-                                        
-                                        pdf.setFontSize(10);
-                                        pdf.setFont("helvetica", "normal");
-                                        pdf.text("Bukti perjalanan resmi & terverifikasi Blockchain", 35, 24);
-                                    } catch (err) {
-                                        console.error("Gagal load logo, pakai teks saja", err);
-                                        pdf.text("E-Ticket NaikAjaa (Official)", 10, 15);
-                                    }
+                                        try {
+                                            const logoImg = await loadImage('/logos/Logo.png');
+                                            pdf.addImage(logoImg, 'PNG', 10, 10, 20, 20); 
+                                            pdf.setFontSize(16);
+                                            pdf.setFont("helvetica", "bold");
+                                            pdf.text("E-Ticket NaikAjaa (Official)", 35, 18);
+                                            pdf.setFontSize(10);
+                                            pdf.setFont("helvetica", "normal");
+                                            pdf.text("Bukti perjalanan resmi & terverifikasi Blockchain", 35, 24);
+                                        } catch (err) {
+                                            console.error("Gagal load logo", err);
+                                            pdf.text("E-Ticket NaikAjaa (Official)", 10, 15);
+                                        }
 
-                                    // 4. Masukkan Screenshot Tiket di bawah Header
-                                    const imgProps = pdf.getImageProperties(imgData);
-                                    const contentWidth = pdfWidth - 20; // Margin kiri kanan 10mm
-                                    const contentHeight = (imgProps.height * contentWidth) / imgProps.width;
-                                    
-                                    // Posisi Y = 35 (di bawah header logo)
-                                    pdf.addImage(imgData, 'PNG', 10, 35, contentWidth, contentHeight);
-                                    
-                                    // 5. Simpan
-                                    pdf.save(`Tiket-${order.operator}-${order.tanggal}.pdf`);
-                                    
-                                } catch (error) {
-                                    console.error("Gagal download PDF:", error);
-                                    alert("Gagal mendownload tiket.");
-                                }
-                            }}
-                        >📥 Download PDF</button>
+                                        const imgProps = pdf.getImageProperties(imgData);
+                                        const contentWidth = pdfWidth - 20; 
+                                        const contentHeight = (imgProps.height * contentWidth) / imgProps.width;
+                                        
+                                        pdf.addImage(imgData, 'PNG', 10, 35, contentWidth, contentHeight);
+                                        pdf.save(`Tiket-${order.operator}-${order.tanggal}.pdf`);
+                                        
+                                    } catch (error) {
+                                        console.error("Gagal download PDF:", error);
+                                        alert("Gagal mendownload tiket.");
+                                    }
+                                }}
+                            >📥 Download PDF</button>
+                        </div>
                     </div>
-              ))
-             )}
+                ))
+            )}
           </div>
         )}
         
@@ -697,6 +682,7 @@ function Dashboard() {
     </>
   );
 }
+
 function App() {
   return (
     <Routes>
