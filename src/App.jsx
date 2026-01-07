@@ -8,6 +8,8 @@ import BookingPage from './BookingPage';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://sumut-bus-ticketing-backend.vercel.app";
+
 const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(n);
 
 const loadImage = (url) => {
@@ -65,7 +67,7 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
   const checkPromo = () => {
     if(!promoCode) return;
     setLoading(true);
-    axios.post('https://sumut-bus-ticketing-backend.vercel.app/check-promo', { code: promoCode })
+    axios.post(`${API_BASE_URL}/check-promo`, { code: promoCode })
       .then(res => {
         if(res.data.valid) {
           setDiscount(res.data.discount);
@@ -84,7 +86,7 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
     setLoading(true);
     
     // Request Token Transaksi ke Backend
-    axios.post('https://sumut-bus-ticketing-backend.vercel.app/beli', {
+    axios.post(`${API_BASE_URL}/beli`, {
       idRute: item.id, 
       emailUser: user.email, 
       tanggal: item.tanggalPergi, 
@@ -319,7 +321,7 @@ function Dashboard() {
   useEffect(() => {
       const kotaValid = daftarKota.find(k => k.toLowerCase() === cariTujuan.toLowerCase());
       if(kotaValid) {
-          axios.get(`https://sumut-bus-ticketing-backend.vercel.app/info-lokasi?kota=${cariTujuan}&tipe=turun`)
+          axios.get(`${API_BASE_URL}/info-lokasi?kota=${cariTujuan}&tipe=turun`)
             .then(res => { setTurunOptions(res.data); setCariTurun('SEMUA'); })
             .catch(() => setTurunOptions([]));
       }
@@ -328,7 +330,7 @@ function Dashboard() {
   const fetchRute = () => {
     if(!tanggal) return alert("Pilih tanggal dulu!");
     setIsSearchPerformed(true);
-    const url = `https://sumut-bus-ticketing-backend.vercel.app/rute?tanggal=${tanggal}&asal=${cariAsal}&tujuan=${cariTujuan}&lokasi=${cariLokasi}&turun=${cariTurun}`;
+    const url = `${API_BASE_URL}/rute?tanggal=${tanggal}&asal=${cariAsal}&tujuan=${cariTujuan}&lokasi=${cariLokasi}&turun=${cariTurun}`;
     axios.get(url).then(res => setRute(res.data)).catch(console.error);
   };
   
